@@ -1,0 +1,3 @@
+config = {"inputs":61, "hidden1":100, "hidden2":100, "hidden3":100, "outputs":1, "p_norm":2, "lamda1":5, "lamda2":5, "lamda3":5,
+                "learning_rate":0.001, "momentum":0.9, "batch_size":100, "num_epochs":1000, "dropout_prob":1.0, "loss":"log_loss",
+                "false_neg_loss":1.0, "false_pos_loss":5.0}

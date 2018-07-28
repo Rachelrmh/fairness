@@ -1,0 +1,2 @@
+model_checkpoint_path: "C:\\Machine_Learning\\ML Projects\\Fairness\\fairness\\data_aquisition\\test_0\\train_unreg_0\\model.ckpt"
+all_model_checkpoint_paths: "C:\\Machine_Learning\\ML Projects\\Fairness\\fairness\\data_aquisition\\test_0\\train_unreg_0\\model.ckpt"

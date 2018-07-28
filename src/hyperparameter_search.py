@@ -63,8 +63,8 @@ def train_model(train_data, train_labels, test_data, test_labels, config, lipsch
                 sess.run([model.train_acc_op, model.train_prec_op, model.train_rec_op], feed_dict=feed_dict)
 
                 if(lipschitz_constraint):
-                    sess.run([model.w1_projection, model.w2_projection, model.w3_projection])
-
+                    #sess.run([model.w1_projection, model.w2_projection, model.w3_projection])
+                    sess.run([model.w3_projection])
             #compute weight matrix norms after each full pass of data
             metrics_data["w1_norm"].append(sess.run(model.w1_norm))
             metrics_data["w2_norm"].append(sess.run(model.w2_norm))
@@ -82,6 +82,9 @@ def train_model(train_data, train_labels, test_data, test_labels, config, lipsch
             metrics_data["test_rec"].append(sess.run(model.test_rec_op, feed_dict=test_feed_dict))
 
             print("Training Progress {:2.1%}".format(float((epoch+1)/config["num_epochs"])), end="\r", flush=True)
+        print("Training Progress {:2.1%}".format(float((epoch+1)/config["num_epochs"])))
+        cost_matrix = sess.run(model.cost_matrix, feed_dict=test_feed_dict)
+        print(cost_matrix)
         model.save_model(sess, config["model_dir"])
     del model
     print("Training Complete!", "Total Training Time:", datetime.now()-start)
@@ -123,6 +126,7 @@ def retrieve_preprocess_data(SCHUFA_DATA_FILE):
     data = np.array(raw_data) #convert data to numpy matrix
 
     #Normalize columns 1, 4, 12
+    #normalized_data = data
     normalized_data = pp.mean_normalize_columns(data, [1, 4, 12])
 
     #Label encode and one hot encode columns 0, 2, 3, 5, 6, 8, 9, 11, 13, 14, 16, 18, 19
@@ -160,19 +164,21 @@ def main(test_num):
     create_dir_if_needed(DATA_AQUISITION)
     create_dir_if_needed(TEST_DIR)
 
-    config = {"inputs":61, "hidden1":20, "hidden2":20, "outputs":1, "p_norm":1, "lamda1":90, "lamda2":25, "lamda3":1,
-                "learning_rate":0.001, "momentum":0.9, "batch_size":50, "num_epochs":10}
+    config = {"inputs":61, "hidden1":100, "hidden2":100, "hidden3":100, "outputs":1, "p_norm":2, "lamda1":5, "lamda2":5, "lamda3":5,
+                "learning_rate":0.001, "momentum":0.9, "batch_size":100, "num_epochs":2000, "dropout_prob":1.0, "loss":"log_loss",
+                "false_neg_loss":1.0, "false_pos_loss":5.0}
     data, labels = retrieve_preprocess_data(SCHUFA_DATA_DIR)
-    for i in range(3):
+
+    for i in range(1):
 
         dir = os.path.join(DATA_AQUISITION, "test_"+str(test_num), "train_unreg_"+str(i))
         create_dir_if_needed(dir)
         config["model_dir"] = dir
 
         train_data, train_labels, test_data, test_labels = pp.train_test_stratified_split(data, labels, test_size=0.2)
-        metrics_data = train_model(train_data, train_labels, test_data, test_labels, config, lipschitz_constraint=False)
+        metrics_data = train_model(train_data, train_labels, test_data, test_labels, config, lipschitz_constraint=True)
         plots.plot_metrics(metrics_data, config, display=False)
 
 if __name__ == "__main__":
-    test_num = 0
+    test_num = 2
     main(test_num)
